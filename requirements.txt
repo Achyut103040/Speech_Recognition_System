@@ -1,0 +1,10 @@
+kivy>=2.1.0
+sounddevice>=0.4.5
+soundfile>=0.12.1
+numpy>=1.21
+matplotlib>=3.4
+vosk>=0.3.45
+requests>=2.25.1
+fastapi>=0.70.0
+uvicorn>=0.18.0
+python-multipart>=0.0.5

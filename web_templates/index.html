@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1976D2">
+    
+    <title>Speech Recognition - Multi-Platform</title>
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/static/icon-192.png">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        
+        .platform-badge {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 0 5px;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .recording {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .icon {
+            font-size: 2em;
+        }
+        
+        #transcription {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 150px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .install-prompt {
+            background: #2196F3;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .install-prompt button {
+            background: white;
+            color: #2196F3;
+            padding: 10px 20px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            button {
+                padding: 15px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Speech Recognition</h1>
+        <div class="subtitle">
+            <span class="platform-badge">✓ Android</span>
+            <span class="platform-badge">✓ iOS</span>
+            <span class="platform-badge">✓ Desktop</span>
+        </div>
+        
+        <div id="installPrompt" class="install-prompt">
+            📱 Install this app for the best experience!
+            <button onclick="installApp()">Install Now</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+        
+        <div class="button-grid">
+            <button id="recordBtn" onclick="toggleRecording()">
+                <span class="icon">🎙️</span>
+                <span id="recordText">Record Audio</span>
+            </button>
+            
+            <button onclick="document.getElementById('fileInput').click()">
+                <span class="icon">📁</span>
+                <span>Upload File</span>
+            </button>
+            
+            <button onclick="transcribe()">
+                <span class="icon">✍️</span>
+                <span>Transcribe</span>
+            </button>
+            
+            <button onclick="visualize()">
+                <span class="icon">📊</span>
+                <span>Visualize</span>
+            </button>
+            
+            <button onclick="showSettings()">
+                <span class="icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+            
+            <button onclick="clearAll()">
+                <span class="icon">🗑️</span>
+                <span>Clear</span>
+            </button>
+        </div>
+        
+        <div id="transcription">Transcription will appear here...</div>
+        
+        <input type="file" id="fileInput" accept="audio/*" onchange="handleFileUpload(event)">
+    </div>
+    
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let currentAudioBlob = null;
+        let deferredPrompt;
+        
+        // Check for PWA install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installPrompt').style.display = 'block';
+        });
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showStatus('App installed successfully!', 'success');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installPrompt').style.display = 'none';
+                });
+            }
+        }
+        
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+        
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        async function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            const text = document.getElementById('recordText');
+            
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        currentAudioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        showStatus('Recording saved! Click Transcribe to convert to text.', 'success');
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.classList.add('recording');
+                    text.textContent = 'Stop Recording';
+                    showStatus('Recording in progress...', 'info');
+                } catch (err) {
+                    showStatus('Microphone access denied. Please allow microphone permission.', 'error');
+                }
+            } else {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                btn.classList.remove('recording');
+                text.textContent = 'Record Audio';
+            }
+        }
+        
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                currentAudioBlob = file;
+                showStatus(`File "${file.name}" uploaded. Click Transcribe.`, 'success');
+            }
+        }
+        
+        async function transcribe() {
+            if (!currentAudioBlob) {
+                showStatus('Please record audio or upload a file first!', 'error');
+                return;
+            }
+            
+            showStatus('Transcribing...', 'info');
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', currentAudioBlob, 'audio.wav');
+                
+                const response = await fetch('/api/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('transcription').textContent = result.transcription || 'No speech detected';
+                    showStatus('Transcription complete!', 'success');
+                } else {
+                    showStatus('Transcription failed: ' + result.error, 'error');
+                }
+            } catch (err) {
+                showStatus('Error: ' + err.message, 'error');
+            }
+        }
+        
+        function visualize() {
+            if (!currentAudioBlob) {
+                showStatus('Please record audio first!', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext.decodeAudioData(e.target.result, function(buffer) {
+                    const data = buffer.getChannelData(0);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 800;
+                    canvas.height = 200;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.fillStyle = '#667eea';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    
+                    const step = Math.ceil(data.length / canvas.width);
+                    const amp = canvas.height / 2;
+                    
+                    for (let i = 0; i < canvas.width; i++) {
+                        const min = Math.min(...data.slice(i * step, (i + 1) * step));
+                        const max = Math.max(...data.slice(i * step, (i + 1) * step));
+                        
+                        ctx.moveTo(i, (1 + min) * amp);
+                        ctx.lineTo(i, (1 + max) * amp);
+                    }
+                    
+                    ctx.stroke();
+                    
+                    const img = new Image();
+                    img.src = canvas.toDataURL();
+                    img.style.width = '100%';
+                    img.style.borderRadius = '15px';
+                    img.style.marginTop = '20px';
+                    
+                    const existing = document.querySelector('img');
+                    if (existing) existing.remove();
+                    document.querySelector('.container').appendChild(img);
+                    
+                    showStatus('Waveform visualized!', 'success');
+                });
+            };
+            reader.readAsArrayBuffer(currentAudioBlob);
+        }
+        
+        function showSettings() {
+            alert('Settings:\n\n' +
+                  '✓ Platform: ' + (navigator.platform || 'Web') + '\n' +
+                  '✓ Microphone: ' + (navigator.mediaDevices ? 'Available' : 'Not available') + '\n' +
+                  '✓ PWA Installed: ' + (window.matchMedia('(display-mode: standalone)').matches ? 'Yes' : 'No') + '\n' +
+                  '✓ Online: ' + (navigator.onLine ? 'Yes' : 'No'));
+        }
+        
+        function clearAll() {
+            document.getElementById('transcription').textContent = 'Transcription will appear here...';
+            currentAudioBlob = null;
+            audioChunks = [];
+            const img = document.querySelector('img');
+            if (img) img.remove();
+            showStatus('Cleared!', 'success');
+        }
+        
+        // Show install prompt on iOS
+        if (navigator.standalone === false) {
+            setTimeout(() => {
+                document.getElementById('installPrompt').style.display = 'block';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

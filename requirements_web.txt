@@ -1,0 +1,6 @@
+# Web App Requirements for Cross-Platform Deployment
+Flask==3.0.0
+Flask-CORS==4.0.0
+vosk==0.3.45
+gunicorn==21.2.0
+python-multipart==0.0.6

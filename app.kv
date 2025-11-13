@@ -1,0 +1,220 @@
+# Kivy layout for the speech recognition app
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+
+<Root>:
+    HomeScreen:
+        name: 'home'
+    RecordScreen:
+        name: 'record'
+    UploadScreen:
+        name: 'upload'
+    VisualizeScreen:
+        name: 'visualize'
+    TranscribeScreen:
+        name: 'transcribe'
+    SettingsScreen:
+        name: 'settings'
+
+<HomeScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 12
+        spacing: 12
+        Label:
+            text: 'Speech Recognition App'
+            font_size: '24sp'
+            size_hint_y: None
+            height: '50dp'
+        ScrollView:
+            GridLayout:
+                cols: 2
+                spacing: 8
+                size_hint_y: None
+                height: self.minimum_height
+                Button:
+                    text: 'Record'
+                    size_hint_y: None
+                    height: '50dp'
+                    on_release: app.root.current = 'record'
+                Button:
+                    text: 'Upload'
+                    size_hint_y: None
+                    height: '50dp'
+                    on_release: app.root.current = 'upload'
+                Button:
+                    text: 'Visualize'
+                    size_hint_y: None
+                    height: '50dp'
+                    on_release: app.root.current = 'visualize'
+                Button:
+                    text: 'Transcribe'
+                    size_hint_y: None
+                    height: '50dp'
+                    on_release: app.root.current = 'transcribe'
+                Button:
+                    text: 'Settings'
+                    size_hint_y: None
+                    height: '50dp'
+                    on_release: app.root.current = 'settings'
+                Button:
+                    text: 'Exit'
+                    size_hint_y: None
+                    height: '50dp'
+                    on_release: root.on_exit_click()
+
+<RecordScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 12
+        spacing: 12
+        BoxLayout:
+            size_hint_y: None
+            height: '40dp'
+            Label:
+                text: 'Duration (s):'
+                size_hint_x: None
+                width: '120dp'
+            TextInput:
+                id: duration_input
+                text: '5'
+                input_filter: 'float'
+        BoxLayout:
+            size_hint_y: None
+            height: '48dp'
+            Button:
+                id: record_btn
+                text: 'Start Recording'
+                on_release: root.toggle_record()
+            Button:
+                text: 'Record (fixed dur)'
+                on_release: root.start_record()
+        Label:
+            id: status
+            text: 'Ready to record.'
+        Button:
+            text: 'Back'
+            size_hint_y: None
+            height: '44dp'
+            on_release: app.root.current = 'home'
+
+<UploadScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 12
+        spacing: 12
+        FileChooserListView:
+            id: filechooser
+            filters: ['*.wav', '*.mp3', '*.flac']
+            on_selection: root.on_file_select(self.selection)
+        Label:
+            id: status
+            text: 'Select an audio file to upload.'
+        Button:
+            text: 'Back'
+            size_hint_y: None
+            height: '44dp'
+            on_release: app.root.current = 'home'
+
+<VisualizeScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 12
+        spacing: 12
+        Label:
+            id: status
+            text: 'Visuals will appear below.'
+        GridLayout:
+            cols: 2
+            Image:
+                id: wave_img
+                source: ''
+            Image:
+                id: spec_img
+                source: ''
+        Button:
+            text: 'Back'
+            size_hint_y: None
+            height: '44dp'
+            on_release: app.root.current = 'home'
+
+<TranscribeScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 12
+        spacing: 12
+        Label:
+            text: 'Transcription result:'
+        ScrollView:
+            Label:
+                id: result
+                text: 'No transcription yet.'
+                size_hint_y: None
+                height: self.texture_size[1]
+                text_size: self.width, None
+        Button:
+            text: 'Back'
+            size_hint_y: None
+            height: '44dp'
+            on_release: app.root.current = 'home'
+
+<SettingsScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 12
+        spacing: 8
+        Label:
+            text: 'Settings'
+            font_size: '20sp'
+            size_hint_y: None
+            height: '36dp'
+        BoxLayout:
+            size_hint_y: None
+            height: '36dp'
+            Label:
+                text: 'Vosk model:'
+                size_hint_x: None
+                width: '100dp'
+            Label:
+                id: model_status
+                text: 'No model detected'
+        BoxLayout:
+            size_hint_y: None
+            height: '36dp'
+            Label:
+                text: 'Server URL:'
+                size_hint_x: None
+                width: '100dp'
+            TextInput:
+                id: server_url_input
+                text: ''
+                hint_text: 'http://<host>:8000'
+        BoxLayout:
+            size_hint_y: None
+            height: '36dp'
+            Button:
+                text: 'Save Server URL'
+                on_release: root.save_server_url(server_url_input.text)
+            Button:
+                text: 'Clear'
+                on_release:
+                    server_url_input.text = ''
+                    root.on_pre_enter()
+        Button:
+            text: 'Download small English Vosk model'
+            size_hint_y: None
+            height: '44dp'
+            on_release: root.download_default_model()
+        Label:
+            text: 'Or choose a local model folder:'
+            size_hint_y: None
+            height: '28dp'
+        FileChooserListView:
+            id: model_chooser
+            path: '.'
+            filters: []
+            on_selection: root.on_model_select(self.selection)
+        Button:
+            text: 'Back'
+            size_hint_y: None
+            height: '44dp'
+            on_release: app.root.current = 'home'
