@@ -49,7 +49,7 @@ try:
     error_logger.write_error("Kivy imported successfully")
     
     # Force portrait mode to prevent landscape crash
-    Config.set('graphics', 'orientation', 'portrait')
+    #Config.set('graphics', 'orientation', 'portrait')
     
     # Try to import Android-specific modules
     if platform == 'android':
