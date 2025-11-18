@@ -24,16 +24,16 @@ source.exclude_dirs = tests, bin, venv, .venv
 # (version) app version
 version = 1.0.2
 
-# CRITICAL FIX: Add all necessary client-side dependencies from requirements.txt
-# Removed sounddevice as it is not mobile-friendly; android_audio.py is used instead.
-# Temporarily removed numpy,soundfile,vosk,requests to avoid SSL module issues
-requirements = python3,kivy,android,pyjnius
+# CRITICAL: Core dependencies for speech recognition
+requirements = python3,kivy,vosk,cython,pip,setuptools
 
-# (int) Target Android API
+# (int) Target Android API - SDK version
 android.api = 33
+android.sdk = 33
 
 # (int) Minimum API required
 android.minapi = 21
+android.min_sdk = 21
 
 # (int) Android NDK version to use
 android.ndk = 25b
@@ -46,6 +46,9 @@ android.archs = arm64-v8a
 
 # (bool) Enable AndroidX support
 android.enable_androidx = True
+
+# (list) Add resource directories for models
+android.add_resources = models
 
 # (list) Android permissions
 android.permissions = INTERNET,RECORD_AUDIO,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,MANAGE_EXTERNAL_STORAGE
@@ -72,7 +75,7 @@ icon.filename = %(source.dir)s/icon.png
 
 # p4a options - CRITICAL: Keep pyjnius for Android communication
 p4a.bootstrap = sdl2
-p4a.hook = %(source.dir)s/hook.py
+# p4a.hook = %(source.dir)s/hook.py
 
 # Use stable p4a version (before Gradle 8 changes)
 p4a.branch = master
